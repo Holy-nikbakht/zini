@@ -339,6 +339,9 @@ async function loadBookings(){
   const res = await fetch(GH_API, { headers:{ Authorization:`token ${GITHUB.token}` }, cache:"no-store" });
   if(res.status === 404){ state.bookings = []; state.sha = null; return; }
   const data = await res.json();
+  if(!res.ok){
+    throw new Error(`دریافت از گیت‌هاب ناموفق بود (کد ${res.status}): ${data.message || 'خطای نامشخص'}`);
+  }
   state.sha = data.sha;
   state.bookings = JSON.parse(b64DecodeUnicode(data.content));
 }
@@ -682,3 +685,4 @@ document.getElementById('bookingsList').addEventListener('click', async (e)=>{
 </script>
 </body>
 </html>
+
