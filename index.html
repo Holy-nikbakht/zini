@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>رزرو نوبت آرایشگاه</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap');
+  :root{
+    --bg:#1c1614; --bg-2:#241c19; --card:#2a211d; --card-hi:#33281f;
+    --gold:#c9a24a; --gold-soft:#e8c97a; --text:#f2e9de; --text-dim:#a8998c;
+    --line:#3d322b; --ok:#7fae7a; --warn:#d9a441; --err:#c1584f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Vazirmatn',sans-serif;background:radial-gradient(circle at 20% 0%,#2b211d 0%,var(--bg) 55%);color:var(--text);min-height:100vh;padding-bottom:40px;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 14px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;background:rgba(28,22,20,0.92);backdrop-filter:blur(10px);}
+  .brand .name{font-weight:800;font-size:1.15rem;color:var(--gold-soft);}
+  .brand .sub{font-size:.7rem;color:var(--text-dim);}
+  .switch{display:flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;}
+  .switch button{border:none;background:transparent;color:var(--text-dim);padding:7px 14px;border-radius:999px;font-family:inherit;font-size:.78rem;cursor:pointer;}
+  .switch button.active{background:linear-gradient(135deg,var(--gold),#a8823a);color:#1c1614;font-weight:700;}
+  .wrap{max-width:480px;margin:0 auto;padding:18px 16px 0;}
+  .card{background:linear-gradient(180deg,var(--card) 0%,var(--bg-2) 100%);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:16px;}
+  h2.section-title{font-size:.95rem;font-weight:700;color:var(--gold-soft);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+  h2.section-title .n{width:22px;height:22px;border-radius:50%;background:var(--gold);color:#1c1614;font-size:.75rem;display:flex;align-items:center;justify-content:center;font-weight:800;}
+  .services{display:flex;flex-direction:column;gap:8px;}
+  .svc{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg-2);cursor:pointer;}
+  .svc.sel{border-color:var(--gold);background:var(--card-hi);}
+  .svc .t{font-weight:600;font-size:.92rem;} .svc .p{font-size:.8rem;color:var(--text-dim);} .svc.sel .p{color:var(--gold-soft);}
+  .dates{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;}
+  .date-chip{flex:0 0 auto;min-width:56px;text-align:center;padding:10px 8px;border-radius:12px;border:1px solid var(--line);background:var(--bg-2);cursor:pointer;}
+  .date-chip .d1{font-size:.7rem;color:var(--text-dim);} .date-chip .d2{font-size:1rem;font-weight:700;margin:2px 0;} .date-chip .d3{font-size:.65rem;color:var(--text-dim);}
+  .date-chip.sel{background:linear-gradient(135deg,var(--gold),#a8823a);border-color:var(--gold);}
+  .date-chip.sel *{color:#1c1614 !important;}
+  .slots{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px;}
+  .slot{padding:9px 4px;text-align:center;border-radius:10px;border:1px solid var(--line);background:var(--bg-2);font-size:.82rem;cursor:pointer;}
+  .slot.sel{background:linear-gradient(135deg,var(--gold),#a8823a);color:#1c1614;font-weight:700;border-color:var(--gold);}
+  .slot.taken{opacity:.3;text-decoration:line-through;cursor:not-allowed;}
+  .empty-hint{color:var(--text-dim);font-size:.8rem;text-align:center;padding:10px 0;}
+  label{display:block;font-size:.78rem;color:var(--text-dim);margin-bottom:6px;}
+  input[type=text],input[type=tel]{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg-2);color:var(--text);font-family:inherit;font-size:.9rem;margin-bottom:14px;}
+  input:focus{outline:none;border-color:var(--gold);}
+  .amount-box{background:linear-gradient(135deg,rgba(201,162,74,.12),rgba(181,103,90,.08));border:1px solid var(--gold);border-radius:14px;padding:14px;margin-bottom:14px;}
+  .amount-box .row{display:flex;justify-content:space-between;font-size:.85rem;padding:4px 0;}
+  .amount-box .row.total{border-top:1px dashed var(--line);margin-top:6px;padding-top:10px;font-weight:800;color:var(--gold-soft);font-size:1rem;}
+  .card-num{font-family:monospace;letter-spacing:2px;font-size:1.15rem;text-align:center;background:var(--bg);border:1px dashed var(--gold);border-radius:10px;padding:12px;margin:10px 0;color:var(--gold-soft);font-weight:700;direction:ltr;}
+  .copy-btn{display:block;margin:0 auto 4px;background:none;border:none;color:var(--gold);font-size:.75rem;cursor:pointer;}
+  .upload-box{border:2px dashed var(--line);border-radius:14px;padding:20px;text-align:center;cursor:pointer;margin-bottom:14px;}
+  .upload-box.has-img{padding:10px;} .upload-box img{max-width:100%;max-height:220px;border-radius:10px;}
+  .upload-box .icon{font-size:1.8rem;margin-bottom:6px;} .upload-box .t{font-size:.85rem;color:var(--text-dim);}
+  .btn{width:100%;padding:14px;border:none;border-radius:14px;font-family:inherit;font-weight:700;font-size:.95rem;cursor:pointer;}
+  .btn-primary{background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:#1c1614;}
+  .btn-primary:disabled{opacity:.35;cursor:not-allowed;}
+  .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--text-dim);margin-top:8px;}
+  .btn-danger{background:rgba(193,88,79,.15);border:1px solid var(--err);color:#e8a49e;}
+  .btn-ok{background:linear-gradient(135deg,#8fc287,var(--ok));color:#132712;}
+  .success-screen{text-align:center;padding:30px 10px;}
+  .success-screen .ic{font-size:3rem;margin-bottom:10px;} .success-screen h3{color:var(--gold-soft);margin-bottom:8px;}
+  .success-screen p{color:var(--text-dim);font-size:.85rem;line-height:1.9;}
+  .booking-item{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;background:var(--bg-2);}
+  .booking-item .top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+  .booking-item .name{font-weight:700;} .booking-item .meta{font-size:.78rem;color:var(--text-dim);margin-top:2px;}
+  .status-tag{font-size:.7rem;padding:4px 10px;border-radius:999px;font-weight:700;white-space:nowrap;}
+  .status-tag.pending{background:rgba(217,164,65,.18);color:var(--warn);}
+  .status-tag.confirmed{background:rgba(127,174,122,.18);color:var(--ok);}
+  .status-tag.rejected{background:rgba(193,88,79,.18);color:var(--err);}
+  .booking-item img{width:100%;border-radius:10px;margin:10px 0;max-height:260px;object-fit:cover;}
+  .actions{display:flex;gap:8px;margin-top:10px;}
+  .filters{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;}
+  .filters button{flex:0 0 auto;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--bg-2);color:var(--text-dim);font-family:inherit;font-size:.78rem;cursor:pointer;}
+  .filters button.active{background:var(--gold);color:#1c1614;border-color:var(--gold);font-weight:700;}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card-hi);border:1px solid var(--gold);color:var(--text);padding:12px 20px;border-radius:12px;font-size:.85rem;z-index:100;opacity:0;transition:.3s;pointer-events:none;max-width:90%;text-align:center;}
+  .toast.show{opacity:1;}
+  .hidden{display:none !important;}
+  .loading{text-align:center;padding:30px;color:var(--text-dim);font-size:.85rem;}
+  .login-box{max-width:340px;margin:60px auto 0;padding:0 16px;}
+  .action-screen{text-align:center;padding:40px 16px;}
+  .action-screen .ic{font-size:3rem;margin-bottom:14px;}
+</style>
+</head>
+<body>
+
+<div id="actionScreen" class="wrap hidden">
+  <div class="card action-screen" id="actionScreenContent"></div>
+</div>
+
+<div id="mainApp">
+<div class="topbar">
+  <div class="brand"><div class="name">آرایشگاه</div><div class="sub">رزرو نوبت آنلاین</div></div>
+  <div class="switch">
+    <button id="tabCustomerBtn" class="active">مشتری</button>
+    <button id="tabBarberBtn">آرایشگر</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div id="customerView">
+    <div id="bookingForm">
+      <div class="card"><h2 class="section-title"><span class="n">۱</span> انتخاب خدمت</h2><div class="services" id="servicesList"></div></div>
+      <div class="card"><h2 class="section-title"><span class="n">۲</span> انتخاب روز</h2><div class="dates" id="datesList"></div></div>
+      <div class="card"><h2 class="section-title"><span class="n">۳</span> انتخاب ساعت</h2><div id="slotsWrap"><div class="empty-hint">اول روز رو انتخاب کن</div></div></div>
+      <div class="card">
+        <h2 class="section-title"><span class="n">۴</span> اطلاعات شما</h2>
+        <label>نام و نام خانوادگی</label><input type="text" id="custName" placeholder="مثلاً: علی محمدی">
+        <label>شماره همراه</label><input type="tel" id="custPhone" placeholder="09xxxxxxxxx">
+      </div>
+      <div class="card" id="paymentCard" style="display:none">
+        <h2 class="section-title"><span class="n">۵</span> پرداخت بیعانه</h2>
+        <div class="amount-box">
+          <div class="row"><span>مبلغ کل خدمت</span><span id="fullAmount">-</span></div>
+          <div class="row total"><span>بیعانه (۵۰٪) — واریز کنید</span><span id="depositAmount">-</span></div>
+        </div>
+        <div style="font-size:.78rem;color:var(--text-dim);text-align:center;margin-bottom:4px;">شماره کارت</div>
+        <div class="card-num" id="cardNumber"></div>
+        <button class="copy-btn" id="copyCardBtn">📋 کپی شماره کارت</button>
+      </div>
+      <div class="card" id="receiptCard" style="display:none">
+        <h2 class="section-title"><span class="n">۶</span> آپلود رسید واریزی</h2>
+        <div class="upload-box" id="uploadBox"><div class="icon">📷</div><div class="t">برای انتخاب عکس رسید ضربه بزنید</div></div>
+        <input type="file" id="fileInput" accept="image/*" class="hidden">
+      </div>
+      <button class="btn btn-primary" id="submitBtn" disabled>ثبت نهایی نوبت</button>
+    </div>
+    <div id="successScreen" class="card success-screen hidden">
+      <div class="ic">✅</div><h3>نوبت شما ثبت شد</h3>
+      <p>رسید پرداختی شما ارسال شد و در انتظار تایید آرایشگاه است.<br>پس از بررسی رسید، نوبت شما قطعی می‌شود.</p>
+      <button class="btn btn-ghost" id="newBookingBtn">ثبت نوبت جدید</button>
+    </div>
+  </div>
+
+  <div id="barberView" class="hidden">
+    <div class="login-box" id="loginBox">
+      <div class="card"><h2 class="section-title">🔒 ورود آرایشگر</h2><label>رمز عبور</label><input type="text" id="pwInput" placeholder="رمز عبور را وارد کنید"><button class="btn btn-primary" id="loginBtn">ورود</button></div>
+    </div>
+    <div id="panelBox" class="hidden">
+      <div class="filters" id="filters">
+        <button data-f="pending" class="active">در انتظار تایید</button>
+        <button data-f="confirmed">تایید شده</button>
+        <button data-f="rejected">رد شده</button>
+        <button data-f="all">همه</button>
+      </div>
+      <div id="bookingsList"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== قابل ویرایش ===================== */
+const SETTINGS = {
+  cardNumber: "6037-9975-0000-0000",
+  barberPassword: "1234",
+  slotMinutes: 30,
+  workStartHour: 9,
+  workEndHour: 21,
+  daysAhead: 14,
+  services: [
+    { id:"cut",   name:"کوتاهی مو",      price:300000 },
+    { id:"color", name:"رنگ مو",         price:900000 },
+    { id:"style", name:"میکاپ / شینیون", price:700000 },
+    { id:"wash",  name:"شستشو و بلوند",  price:500000 }
+  ]
+};
+const GITHUB = {
+  owner: "Holy-nikbakht",
+  repo: "zini",
+  token: "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",
+  file: "bookings.json"
+};
+const TELEGRAM = {
+  botToken: "8882005169:AAE0XPif0DIl_FZpPgJSd0DNaa03KZGHXPg",
+  chatId: "6248048933"
+};
+/* ========================================================= */
+
+let state = { service:null, date:null, time:null, receiptDataUrl:null, bookings:[], sha:null, barberFilter:"pending" };
+const toastEl = document.getElementById('toast');
+function toast(msg){ toastEl.textContent = msg; toastEl.classList.add('show'); setTimeout(()=>toastEl.classList.remove('show'), 2500); }
+function fmtPrice(n){ return n.toLocaleString('fa-IR') + ' تومان'; }
+const GH_API = `https://api.github.com/repos/${GITHUB.owner}/${GITHUB.repo}/contents/${GITHUB.file}`;
+function b64EncodeUnicode(str){ return btoa(unescape(encodeURIComponent(str))); }
+function b64DecodeUnicode(str){ return decodeURIComponent(escape(atob(str))); }
+
+/* ---------- GitHub storage ---------- */
+async function loadBookings(){
+  const res = await fetch(GH_API, { headers:{ Authorization:`token ${GITHUB.token}` }, cache:"no-store" });
+  if(res.status === 404){ state.bookings = []; state.sha = null; return; }
+  const data = await res.json();
+  state.sha = data.sha;
+  state.bookings = JSON.parse(b64DecodeUnicode(data.content));
+}
+async function saveBookings(message){
+  const body = {
+    message: message || "update bookings",
+    content: b64EncodeUnicode(JSON.stringify(state.bookings, null, 2)),
+    sha: state.sha || undefined
+  };
+  const res = await fetch(GH_API, {
+    method: "PUT",
+    headers:{ Authorization:`token ${GITHUB.token}`, "Content-Type":"application/json" },
+    body: JSON.stringify(body)
+  });
+  const data = await res.json();
+  if(!res.ok) throw new Error(data.message || "GitHub save failed");
+  state.sha = data.content.sha;
+}
+
+/* ---------- Telegram ---------- */
+async function sendTelegramNotification(booking){
+  const siteUrl = window.location.origin + window.location.pathname;
+  const confirmUrl = `${siteUrl}?action=confirm&id=${booking.id}`;
+  const rejectUrl = `${siteUrl}?action=reject&id=${booking.id}`;
+  const caption =
+`🔔 نوبت جدید
+
+👤 ${booking.name}
+📞 ${booking.phone}
+💇 ${booking.serviceName}
+📅 ${booking.date} — ساعت ${booking.time}
+💰 بیعانه واریزی: ${fmtPrice(booking.deposit)} از ${fmtPrice(booking.price)}`;
+
+  const replyMarkup = {
+    inline_keyboard: [[
+      { text:"✅ تایید نوبت", url: confirmUrl },
+      { text:"❌ رد نوبت", url: rejectUrl }
+    ]]
+  };
+
+  try{
+    const blob = await (await fetch(booking.receipt)).blob();
+    const form = new FormData();
+    form.append("chat_id", TELEGRAM.chatId);
+    form.append("caption", caption);
+    form.append("reply_markup", JSON.stringify(replyMarkup));
+    form.append("photo", blob, "receipt.jpg");
+    await fetch(`https://api.telegram.org/bot${TELEGRAM.botToken}/sendPhoto`, { method:"POST", body: form });
+  }catch(e){
+    // fallback: text-only message if photo send fails
+    await fetch(`https://api.telegram.org/bot${TELEGRAM.botToken}/sendMessage`, {
+      method:"POST", headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ chat_id: TELEGRAM.chatId, text: caption, reply_markup: replyMarkup })
+    });
+  }
+}
+
+/* ---------- deep-link action handling (from Telegram buttons) ---------- */
+async function handleUrlAction(){
+  const params = new URLSearchParams(window.location.search);
+  const action = params.get('action');
+  const id = params.get('id');
+  if(!action || !id) return false;
+
+  document.getElementById('mainApp').classList.add('hidden');
+  const screen = document.getElementById('actionScreen');
+  const content = document.getElementById('actionScreenContent');
+  screen.classList.remove('hidden');
+  content.innerHTML = '<div class="loading">در حال ثبت...</div>';
+
+  try{
+    await loadBookings();
+    const b = state.bookings.find(x=>x.id===id);
+    if(!b){ content.innerHTML = '<div class="ic">⚠️</div><h3>نوبت پیدا نشد</h3>'; return true; }
+    b.status = action === 'confirm' ? 'confirmed' : 'rejected';
+    await saveBookings(`${action} booking ${id}`);
+    content.innerHTML = `
+      <div class="ic">${action==='confirm' ? '✅' : '❌'}</div>
+      <h3>${action==='confirm' ? 'نوبت تایید شد' : 'نوبت رد شد'}</h3>
+      <p style="color:var(--text-dim);font-size:.85rem;margin-top:8px;">${b.name} — ${b.date} ساعت ${b.time}</p>`;
+  }catch(e){
+    content.innerHTML = `<div class="ic">⚠️</div><h3>خطا</h3><p style="color:var(--text-dim);font-size:.8rem;">${e.message}</p>`;
+  }
+  return true;
+}
+
+/* ---------- date/slot generation ---------- */
+const weekdays = ['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنج‌شنبه','جمعه','شنبه'];
+const monthsFa = ['ژانویه','فوریه','مارس','آوریل','مه','ژوئن','ژوئیه','اوت','سپتامبر','اکتبر','نوامبر','دسامبر'];
+
+function buildDates(){
+  const wrap = document.getElementById('datesList'); wrap.innerHTML = '';
+  const today = new Date();
+  for(let i=0;i<SETTINGS.daysAhead;i++){
+    const d = new Date(today); d.setDate(d.getDate()+i);
+    const key = d.toISOString().slice(0,10);
+    const chip = document.createElement('div');
+    chip.className = 'date-chip'; chip.dataset.date = key;
+    chip.innerHTML = `<div class="d1">${weekdays[d.getDay()]}</div><div class="d2">${d.getDate()}</div><div class="d3">${monthsFa[d.getMonth()]}</div>`;
+    chip.onclick = ()=> selectDate(key, chip);
+    wrap.appendChild(chip);
+  }
+}
+function selectDate(key, chip){
+  document.querySelectorAll('.date-chip').forEach(c=>c.classList.remove('sel'));
+  chip.classList.add('sel'); state.date = key; state.time = null;
+  buildSlots(); updateSubmitState();
+}
+function buildSlots(){
+  const wrap = document.getElementById('slotsWrap');
+  if(!state.date){ wrap.innerHTML = '<div class="empty-hint">اول روز رو انتخاب کن</div>'; return; }
+  const taken = new Set(state.bookings.filter(b=>b.date===state.date && b.status!=='rejected').map(b=>b.time));
+  let html = '<div class="slots">';
+  for(let h=SETTINGS.workStartHour; h<SETTINGS.workEndHour; h++){
+    for(let m=0; m<60; m+=SETTINGS.slotMinutes){
+      const t = String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+      const isTaken = taken.has(t);
+      html += `<div class="slot ${isTaken?'taken':''}" data-time="${t}" ${isTaken?'':`onclick="selectSlot('${t}')"`}>${t}</div>`;
+    }
+  }
+  html += '</div>'; wrap.innerHTML = html;
+}
+function selectSlot(t){
+  state.time = t;
+  document.querySelectorAll('.slot').forEach(s=>s.classList.toggle('sel', s.dataset.time===t));
+  updateSubmitState();
+}
+function buildServices(){
+  const wrap = document.getElementById('servicesList'); wrap.innerHTML = '';
+  SETTINGS.services.forEach(s=>{
+    const el = document.createElement('div'); el.className = 'svc';
+    el.innerHTML = `<span class="t">${s.name}</span><span class="p">${fmtPrice(s.price)}</span>`;
+    el.onclick = ()=>{
+      document.querySelectorAll('.svc').forEach(x=>x.classList.remove('sel'));
+      el.classList.add('sel'); state.service = s;
+      document.getElementById('paymentCard').style.display = 'block';
+      document.getElementById('receiptCard').style.display = 'block';
+      document.getElementById('fullAmount').textContent = fmtPrice(s.price);
+      document.getElementById('depositAmount').textContent = fmtPrice(Math.round(s.price/2));
+      updateSubmitState();
+    };
+    wrap.appendChild(el);
+  });
+}
+document.getElementById('cardNumber').textContent = SETTINGS.cardNumber;
+document.getElementById('copyCardBtn').onclick = ()=>{ navigator.clipboard.writeText(SETTINGS.cardNumber.replace(/-/g,'')); toast('شماره کارت کپی شد'); };
+
+/* ---------- upload ---------- */
+const uploadBox = document.getElementById('uploadBox');
+const fileInput = document.getElementById('fileInput');
+uploadBox.onclick = ()=> fileInput.click();
+fileInput.onchange = (e)=>{
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev)=>{
+    state.receiptDataUrl = ev.target.result;
+    uploadBox.classList.add('has-img');
+    uploadBox.innerHTML = `<img src="${state.receiptDataUrl}">`;
+    updateSubmitState();
+  };
+  reader.readAsDataURL(file);
+};
+
+function updateSubmitState(){
+  const name = document.getElementById('custName').value.trim();
+  const phone = document.getElementById('custPhone').value.trim();
+  const ok = state.service && state.date && state.time && name && phone.length>=10 && state.receiptDataUrl;
+  document.getElementById('submitBtn').disabled = !ok;
+}
+document.getElementById('custName').addEventListener('input', updateSubmitState);
+document.getElementById('custPhone').addEventListener('input', updateSubmitState);
+
+document.getElementById('submitBtn').onclick = async ()=>{
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = 'در حال ثبت...';
+  try{
+    await loadBookings();
+    const conflict = state.bookings.some(b=>b.date===state.date && b.time===state.time && b.status!=='rejected');
+    if(conflict){
+      toast('این ساعت همین الان توسط شخص دیگری رزرو شد.');
+      btn.textContent = 'ثبت نهایی نوبت'; btn.disabled = false; buildSlots(); return;
+    }
+    const booking = {
+      id: 'bk_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+      serviceName: state.service.name, price: state.service.price, deposit: Math.round(state.service.price/2),
+      date: state.date, time: state.time,
+      name: document.getElementById('custName').value.trim(),
+      phone: document.getElementById('custPhone').value.trim(),
+      receipt: state.receiptDataUrl, status: 'pending', createdAt: new Date().toISOString()
+    };
+    state.bookings.push(booking);
+    await saveBookings(`new booking from ${booking.name}`);
+    sendTelegramNotification(booking); // fire and forget
+    document.getElementById('bookingForm').classList.add('hidden');
+    document.getElementById('successScreen').classList.remove('hidden');
+  }catch(e){
+    toast('خطا در ثبت: ' + e.message);
+    btn.textContent = 'ثبت نهایی نوبت'; btn.disabled = false;
+  }
+};
+
+document.getElementById('newBookingBtn').onclick = ()=> window.location.href = window.location.pathname;
+
+/* ---------- tabs ---------- */
+const tabCustomerBtn = document.getElementById('tabCustomerBtn');
+const tabBarberBtn = document.getElementById('tabBarberBtn');
+tabCustomerBtn.onclick = ()=>{ tabCustomerBtn.classList.add('active'); tabBarberBtn.classList.remove('active'); document.getElementById('customerView').classList.remove('hidden'); document.getElementById('barberView').classList.add('hidden'); };
+tabBarberBtn.onclick = ()=>{ tabBarberBtn.classList.add('active'); tabCustomerBtn.classList.remove('active'); document.getElementById('barberView').classList.remove('hidden'); document.getElementById('customerView').classList.add('hidden'); };
+
+/* ---------- barber panel ---------- */
+document.getElementById('loginBtn').onclick = async ()=>{
+  const pw = document.getElementById('pwInput').value;
+  if(pw === SETTINGS.barberPassword){
+    document.getElementById('loginBox').classList.add('hidden');
+    document.getElementById('panelBox').classList.remove('hidden');
+    await refreshBarberList();
+  } else { toast('رمز اشتباه است'); }
+};
+document.getElementById('filters').addEventListener('click', async (e)=>{
+  if(e.target.tagName !== 'BUTTON') return;
+  document.querySelectorAll('#filters button').forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active'); state.barberFilter = e.target.dataset.f;
+  await refreshBarberList();
+});
+const statusLabel = { pending:'در انتظار تایید', confirmed:'تایید شده', rejected:'رد شده' };
+async function refreshBarberList(){
+  const listEl = document.getElementById('bookingsList');
+  listEl.innerHTML = '<div class="loading">در حال بارگذاری...</div>';
+  try{ await loadBookings(); }catch(e){ listEl.innerHTML = '<div class="empty-hint">خطا در دریافت اطلاعات</div>'; return; }
+  let items = state.bookings.slice().sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
+  if(state.barberFilter !== 'all') items = items.filter(b=>b.status === state.barberFilter);
+  if(items.length===0){ listEl.innerHTML = '<div class="empty-hint">نوبتی برای نمایش نیست</div>'; return; }
+  listEl.innerHTML = '';
+  items.forEach(b=>{
+    const el = document.createElement('div'); el.className = 'booking-item';
+    el.innerHTML = `
+      <div class="top">
+        <div>
+          <div class="name">${b.name}</div>
+          <div class="meta">${b.serviceName} · ${b.date} ساعت ${b.time}</div>
+          <div class="meta">📞 ${b.phone}</div>
+          <div class="meta">بیعانه واریزی: ${fmtPrice(b.deposit)} از ${fmtPrice(b.price)}</div>
+        </div>
+        <span class="status-tag ${b.status}">${statusLabel[b.status]}</span>
+      </div>
+      <img src="${b.receipt}">
+      ${b.status==='pending' ? `<div class="actions"><button class="btn btn-ok" data-act="confirm" data-id="${b.id}">تایید نوبت</button><button class="btn btn-danger" data-act="reject" data-id="${b.id}">رد کردن</button></div>` : ''}
+    `;
+    listEl.appendChild(el);
+  });
+}
+document.getElementById('bookingsList').addEventListener('click', async (e)=>{
+  const btn = e.target.closest('button[data-act]'); if(!btn) return;
+  const id = btn.dataset.id, act = btn.dataset.act;
+  btn.disabled = true;
+  try{
+    await loadBookings();
+    const b = state.bookings.find(x=>x.id===id);
+    if(b){ b.status = act === 'confirm' ? 'confirmed' : 'rejected'; await saveBookings(`${act} ${id}`); toast(act==='confirm' ? 'نوبت تایید شد' : 'نوبت رد شد'); }
+  }catch(e){ toast('خطا: ' + e.message); }
+  await refreshBarberList();
+});
+
+/* ---------- init ---------- */
+(async function init(){
+  const handled = await handleUrlAction();
+  if(handled) return;
+  buildServices(); buildDates();
+  try{ await loadBookings(); buildSlots(); }catch(e){ /* ignore on first load */ }
+})();
+</script>
+</body>
+</html>
