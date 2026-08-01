@@ -3,167 +3,90 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<title>سلمونی کیان — رزرو نوبت</title>
+<title>رزرو نوبت آرایشگاه</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap');
-
+  @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap');
   :root{
-    --bg:#0f1215; --bg-2:#161a1e; --card:#1b2025; --card-hi:#20262c;
-    --brass:#b6905a; --brass-soft:#dabb84; --brass-dim:#5f4f36;
-    --ink:#efe8da; --dim:#8b939a; --dim-2:#5c646b;
-    --line:#2a3138; --line-soft:#232a30;
-    --ok:#82a67c; --ok-soft:#1c2620; --warn:#c9a15a; --warn-soft:#2a2419; --err:#bd6153; --err-soft:#291d1b;
+    --bg:#1c1614; --bg-2:#241c19; --card:#2a211d; --card-hi:#33281f;
+    --gold:#c9a24a; --gold-soft:#e8c97a; --text:#f2e9de; --text-dim:#a8998c;
+    --line:#3d322b; --ok:#7fae7a; --warn:#d9a441; --err:#c1584f;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
-  html{scroll-behavior:smooth;}
-  body{
-    font-family:'Vazirmatn',sans-serif;background:var(--bg);color:var(--ink);
-    min-height:100vh;padding-bottom:48px;position:relative;overflow-x:hidden;
-  }
-  body::before{
-    content:'';position:fixed;inset:-20% -20%;z-index:0;pointer-events:none;
-    background:
-      radial-gradient(ellipse 60% 40% at 15% -5%, rgba(182,144,90,.10), transparent 60%),
-      radial-gradient(ellipse 50% 35% at 100% 10%, rgba(182,144,90,.06), transparent 60%);
-  }
-  body::after{
-    content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
-    background:repeating-linear-gradient(135deg, var(--brass) 0 2px, transparent 2px 34px);
-    animation:driftStripes 60s linear infinite;
-  }
-  @keyframes driftStripes{ from{background-position:0 0;} to{background-position:600px 600px;} }
-  @media (prefers-reduced-motion: reduce){ *{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important;} }
-
-  .topbar{
-    display:flex;align-items:center;justify-content:space-between;padding:18px 20px 15px;
-    border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30;
-    background:rgba(15,18,21,.86);backdrop-filter:blur(14px);
-  }
-  .brand .name{font-weight:800;font-size:1.2rem;letter-spacing:-.01em;color:var(--brass-soft);}
-  .brand .sub{font-size:.68rem;color:var(--dim);margin-top:2px;letter-spacing:.02em;}
+  body{font-family:'Vazirmatn',sans-serif;background:radial-gradient(circle at 20% 0%,#2b211d 0%,var(--bg) 55%);color:var(--text);min-height:100vh;padding-bottom:40px;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 14px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;background:rgba(28,22,20,0.92);backdrop-filter:blur(10px);}
+  .brand .name{font-weight:800;font-size:1.15rem;color:var(--gold-soft);}
+  .brand .sub{font-size:.7rem;color:var(--text-dim);}
   .switch{display:flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;}
-  .switch button{border:none;background:transparent;color:var(--dim);padding:7px 15px;border-radius:999px;font-family:inherit;font-size:.76rem;font-weight:600;cursor:pointer;transition:.25s;}
-  .switch button.active{background:linear-gradient(135deg,var(--brass-soft),var(--brass));color:#1a140b;}
-
-  .wrap{max-width:480px;margin:0 auto;padding:20px 16px 0;position:relative;z-index:1;}
-
-  /* progress rail */
-  .rail{display:flex;align-items:center;margin:4px 4px 22px;position:relative;}
-  .rail .seg{flex:1;height:2px;background:var(--line);position:relative;overflow:hidden;}
-  .rail .seg i{position:absolute;inset:0;background:linear-gradient(90deg,var(--brass),var(--brass-soft));width:0%;transition:width .5s cubic-bezier(.4,0,.2,1);}
-  .rail .dot{
-    width:9px;height:9px;border-radius:2px;transform:rotate(45deg);background:var(--line-soft);
-    border:1px solid var(--line);flex:0 0 auto;transition:.4s;position:relative;
-  }
-  .rail .dot.done{background:var(--brass);border-color:var(--brass);box-shadow:0 0 0 3px rgba(182,144,90,.16);}
-  .rail .dot.current{background:var(--brass-soft);border-color:var(--brass-soft);box-shadow:0 0 0 4px rgba(218,187,132,.18);}
-
-  .step{
-    background:linear-gradient(180deg,var(--card) 0%,var(--bg-2) 100%);
-    border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;
-    transition:opacity .5s cubic-bezier(.3,0,.2,1), transform .5s cubic-bezier(.3,0,.2,1), max-height .5s ease;
-  }
-  .step.locked{opacity:.32;pointer-events:none;filter:saturate(.5);}
-  .step.opening{animation:stepIn .5s cubic-bezier(.2,.7,.3,1);}
-  @keyframes stepIn{ from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
-
-  h2.section-title{font-size:.92rem;font-weight:700;color:var(--brass-soft);margin-bottom:13px;display:flex;align-items:center;gap:9px;letter-spacing:.01em;}
-  h2.section-title .n{width:23px;height:23px;border-radius:7px;background:linear-gradient(135deg,var(--brass-soft),var(--brass));color:#1a140b;font-size:.72rem;display:flex;align-items:center;justify-content:center;font-weight:800;flex:0 0 auto;}
-
+  .switch button{border:none;background:transparent;color:var(--text-dim);padding:7px 14px;border-radius:999px;font-family:inherit;font-size:.78rem;cursor:pointer;}
+  .switch button.active{background:linear-gradient(135deg,var(--gold),#a8823a);color:#1c1614;font-weight:700;}
+  .wrap{max-width:480px;margin:0 auto;padding:18px 16px 0;}
+  .card{background:linear-gradient(180deg,var(--card) 0%,var(--bg-2) 100%);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:16px;}
+  h2.section-title{font-size:.95rem;font-weight:700;color:var(--gold-soft);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+  h2.section-title .n{width:22px;height:22px;border-radius:50%;background:var(--gold);color:#1c1614;font-size:.75rem;display:flex;align-items:center;justify-content:center;font-weight:800;}
   .services{display:flex;flex-direction:column;gap:8px;}
-  .svc{display:flex;justify-content:space-between;align-items:center;padding:13px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg-2);cursor:pointer;transition:.25s;position:relative;overflow:hidden;}
-  .svc:active{transform:scale(.98);}
-  .svc.sel{border-color:var(--brass);background:var(--card-hi);box-shadow:inset 0 0 0 1px rgba(182,144,90,.2);}
-  .svc .t{font-weight:600;font-size:.9rem;}
-  .svc .p{font-size:.78rem;color:var(--dim);font-variant-numeric:tabular-nums;}
-  .svc.sel .p{color:var(--brass-soft);}
-
-  .dates{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;}
-  .date-chip{flex:0 0 auto;min-width:58px;text-align:center;padding:10px 6px;border-radius:12px;border:1px solid var(--line);background:var(--bg-2);cursor:pointer;transition:.25s;}
-  .date-chip .d1{font-size:.66rem;color:var(--dim);}
-  .date-chip .d2{font-size:1.05rem;font-weight:700;margin:3px 0;font-variant-numeric:tabular-nums;}
-  .date-chip .d3{font-size:.62rem;color:var(--dim);}
-  .date-chip.sel{background:linear-gradient(135deg,var(--brass-soft),var(--brass));border-color:var(--brass);}
-  .date-chip.sel *{color:#1a140b !important;}
-
-  .slots{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:4px;}
-  .slot-group-label{font-size:.68rem;color:var(--dim-2);margin:12px 2px 8px;letter-spacing:.03em;}
-  .slot-group-label:first-child{margin-top:2px;}
-  .slot{padding:10px 4px;text-align:center;border-radius:10px;border:1px solid var(--line);background:var(--bg-2);font-size:.8rem;cursor:pointer;font-variant-numeric:tabular-nums;transition:.2s;}
-  .slot:active{transform:scale(.95);}
-  .slot.sel{background:linear-gradient(135deg,var(--brass-soft),var(--brass));color:#1a140b;font-weight:700;border-color:var(--brass);}
-  .slot.taken{opacity:.25;text-decoration:line-through;cursor:not-allowed;}
-  .empty-hint{color:var(--dim);font-size:.8rem;text-align:center;padding:14px 0;}
-
-  label{display:block;font-size:.76rem;color:var(--dim);margin-bottom:6px;}
-  input[type=text],input[type=tel]{
-    width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg-2);
-    color:var(--ink);font-family:inherit;font-size:.88rem;margin-bottom:14px;transition:.2s;
-  }
-  input:focus{outline:none;border-color:var(--brass);box-shadow:0 0 0 3px rgba(182,144,90,.12);}
-
-  .amount-box{background:linear-gradient(135deg,rgba(182,144,90,.10),rgba(182,144,90,.04));border:1px solid var(--brass-dim);border-radius:14px;padding:14px;margin-bottom:14px;}
-  .amount-box .row{display:flex;justify-content:space-between;font-size:.83rem;padding:4px 0;font-variant-numeric:tabular-nums;}
-  .amount-box .row.total{border-top:1px dashed var(--line);margin-top:6px;padding-top:10px;font-weight:800;color:var(--brass-soft);font-size:.98rem;}
-  .card-num{font-family:monospace;letter-spacing:2px;font-size:1.1rem;text-align:center;background:var(--bg);border:1px dashed var(--brass);border-radius:10px;padding:12px;margin:10px 0;color:var(--brass-soft);font-weight:700;direction:ltr;}
-  .copy-btn{display:flex;align-items:center;justify-content:center;gap:6px;margin:0 auto 4px;background:none;border:none;color:var(--brass);font-size:.74rem;cursor:pointer;padding:6px;}
-
-  .upload-box{border:1.5px dashed var(--line);border-radius:14px;padding:22px;text-align:center;cursor:pointer;margin-bottom:14px;transition:.2s;}
-  .upload-box:active{transform:scale(.98);}
-  .upload-box.has-img{padding:10px;} .upload-box img{max-width:100%;max-height:220px;border-radius:10px;display:block;margin:0 auto;}
-  .upload-box .ic{color:var(--dim);margin-bottom:8px;} .upload-box .t{font-size:.83rem;color:var(--dim);}
-
-  .btn{width:100%;padding:14px;border:none;border-radius:14px;font-family:inherit;font-weight:700;font-size:.9rem;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
-  .btn:active{transform:scale(.97);}
-  .btn-primary{background:linear-gradient(135deg,var(--brass-soft),var(--brass));color:#1a140b;}
-  .btn-primary:disabled{opacity:.3;cursor:not-allowed;}
-  .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--dim);margin-top:8px;}
-  .btn-danger{background:var(--err-soft);border:1px solid var(--err);color:#e3a99c;}
-  .btn-ok{background:linear-gradient(135deg,#a2c399,var(--ok));color:#12210f;}
-  .btn-sms{background:var(--card-hi);border:1px solid var(--brass);color:var(--brass-soft);margin-top:8px;}
-
-  .success-screen{text-align:center;padding:38px 14px;}
-  .success-screen .ring{width:66px;height:66px;margin:0 auto 16px;}
-  .success-screen h3{color:var(--brass-soft);margin-bottom:8px;font-size:1.05rem;}
-  .success-screen p{color:var(--dim);font-size:.84rem;line-height:1.9;}
-
-  .booking-item{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;background:var(--bg-2);animation:stepIn .4s;}
-  .booking-item .top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:10px;}
-  .booking-item .name{font-weight:700;font-size:.92rem;}
-  .booking-item .meta{font-size:.77rem;color:var(--dim);margin-top:3px;display:flex;align-items:center;gap:6px;}
-  .status-tag{font-size:.68rem;padding:4px 10px;border-radius:999px;font-weight:700;white-space:nowrap;}
-  .status-tag.pending{background:var(--warn-soft);color:var(--warn);}
-  .status-tag.confirmed{background:var(--ok-soft);color:var(--ok);}
-  .status-tag.rejected{background:var(--err-soft);color:var(--err);}
+  .svc{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg-2);cursor:pointer;}
+  .svc.sel{border-color:var(--gold);background:var(--card-hi);}
+  .svc .t{font-weight:600;font-size:.92rem;} .svc .p{font-size:.8rem;color:var(--text-dim);} .svc.sel .p{color:var(--gold-soft);}
+  .dates{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;}
+  .date-chip{flex:0 0 auto;min-width:56px;text-align:center;padding:10px 8px;border-radius:12px;border:1px solid var(--line);background:var(--bg-2);cursor:pointer;}
+  .date-chip .d1{font-size:.7rem;color:var(--text-dim);} .date-chip .d2{font-size:1rem;font-weight:700;margin:2px 0;} .date-chip .d3{font-size:.65rem;color:var(--text-dim);}
+  .date-chip.sel{background:linear-gradient(135deg,var(--gold),#a8823a);border-color:var(--gold);}
+  .date-chip.sel *{color:#1c1614 !important;}
+  .slots{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px;}
+  .slot{padding:9px 4px;text-align:center;border-radius:10px;border:1px solid var(--line);background:var(--bg-2);font-size:.82rem;cursor:pointer;}
+  .slot.sel{background:linear-gradient(135deg,var(--gold),#a8823a);color:#1c1614;font-weight:700;border-color:var(--gold);}
+  .slot.taken{opacity:.3;text-decoration:line-through;cursor:not-allowed;}
+  .empty-hint{color:var(--text-dim);font-size:.8rem;text-align:center;padding:10px 0;}
+  label{display:block;font-size:.78rem;color:var(--text-dim);margin-bottom:6px;}
+  input[type=text],input[type=tel]{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg-2);color:var(--text);font-family:inherit;font-size:.9rem;margin-bottom:14px;}
+  input:focus{outline:none;border-color:var(--gold);}
+  .amount-box{background:linear-gradient(135deg,rgba(201,162,74,.12),rgba(181,103,90,.08));border:1px solid var(--gold);border-radius:14px;padding:14px;margin-bottom:14px;}
+  .amount-box .row{display:flex;justify-content:space-between;font-size:.85rem;padding:4px 0;}
+  .amount-box .row.total{border-top:1px dashed var(--line);margin-top:6px;padding-top:10px;font-weight:800;color:var(--gold-soft);font-size:1rem;}
+  .card-num{font-family:monospace;letter-spacing:2px;font-size:1.15rem;text-align:center;background:var(--bg);border:1px dashed var(--gold);border-radius:10px;padding:12px;margin:10px 0;color:var(--gold-soft);font-weight:700;direction:ltr;}
+  .copy-btn{display:block;margin:0 auto 4px;background:none;border:none;color:var(--gold);font-size:.75rem;cursor:pointer;}
+  .upload-box{border:2px dashed var(--line);border-radius:14px;padding:20px;text-align:center;cursor:pointer;margin-bottom:14px;}
+  .upload-box.has-img{padding:10px;} .upload-box img{max-width:100%;max-height:220px;border-radius:10px;}
+  .upload-box .icon{font-size:1.8rem;margin-bottom:6px;} .upload-box .t{font-size:.85rem;color:var(--text-dim);}
+  .btn{width:100%;padding:14px;border:none;border-radius:14px;font-family:inherit;font-weight:700;font-size:.95rem;cursor:pointer;}
+  .btn-primary{background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:#1c1614;}
+  .btn-primary:disabled{opacity:.35;cursor:not-allowed;}
+  .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--text-dim);margin-top:8px;}
+  .btn-danger{background:rgba(193,88,79,.15);border:1px solid var(--err);color:#e8a49e;}
+  .btn-ok{background:linear-gradient(135deg,#8fc287,var(--ok));color:#132712;}
+  .success-screen{text-align:center;padding:30px 10px;}
+  .success-screen .ic{font-size:3rem;margin-bottom:10px;} .success-screen h3{color:var(--gold-soft);margin-bottom:8px;}
+  .success-screen p{color:var(--text-dim);font-size:.85rem;line-height:1.9;}
+  .booking-item{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;background:var(--bg-2);}
+  .booking-item .top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+  .booking-item .name{font-weight:700;} .booking-item .meta{font-size:.78rem;color:var(--text-dim);margin-top:2px;}
+  .status-tag{font-size:.7rem;padding:4px 10px;border-radius:999px;font-weight:700;white-space:nowrap;}
+  .status-tag.pending{background:rgba(217,164,65,.18);color:var(--warn);}
+  .status-tag.confirmed{background:rgba(127,174,122,.18);color:var(--ok);}
+  .status-tag.rejected{background:rgba(193,88,79,.18);color:var(--err);}
   .booking-item img{width:100%;border-radius:10px;margin:10px 0;max-height:260px;object-fit:cover;}
   .actions{display:flex;gap:8px;margin-top:10px;}
-  .filters{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px;}
-  .filters button{flex:0 0 auto;padding:8px 15px;border-radius:999px;border:1px solid var(--line);background:var(--bg-2);color:var(--dim);font-family:inherit;font-size:.76rem;cursor:pointer;transition:.2s;}
-  .filters button.active{background:var(--brass);color:#1a140b;border-color:var(--brass);font-weight:700;}
-
-  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--card-hi);border:1px solid var(--brass);color:var(--ink);padding:12px 20px;border-radius:12px;font-size:.83rem;z-index:100;opacity:0;transition:.3s;pointer-events:none;max-width:90%;text-align:center;}
-  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .filters{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;}
+  .filters button{flex:0 0 auto;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--bg-2);color:var(--text-dim);font-family:inherit;font-size:.78rem;cursor:pointer;}
+  .filters button.active{background:var(--gold);color:#1c1614;border-color:var(--gold);font-weight:700;}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card-hi);border:1px solid var(--gold);color:var(--text);padding:12px 20px;border-radius:12px;font-size:.85rem;z-index:100;opacity:0;transition:.3s;pointer-events:none;max-width:90%;text-align:center;}
+  .toast.show{opacity:1;}
   .hidden{display:none !important;}
-  .loading{text-align:center;padding:34px;color:var(--dim);font-size:.83rem;}
-  .login-box{max-width:340px;margin:70px auto 0;padding:0 16px;}
-  .action-screen{text-align:center;padding:44px 16px;}
-  .action-screen .ic{margin:0 auto 16px;}
-  footer.contact{max-width:480px;margin:26px auto 0;padding:0 16px;text-align:center;}
-  footer.contact .line{height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent);margin-bottom:16px;}
-  footer.contact .owner{font-size:.78rem;color:var(--dim);}
-  footer.contact a{color:var(--brass-soft);text-decoration:none;font-weight:600;}
-  .spin{animation:spin 1s linear infinite;} @keyframes spin{to{transform:rotate(360deg);}}
+  .loading{text-align:center;padding:30px;color:var(--text-dim);font-size:.85rem;}
+  .login-box{max-width:340px;margin:60px auto 0;padding:0 16px;}
+  .action-screen{text-align:center;padding:40px 16px;}
+  .action-screen .ic{font-size:3rem;margin-bottom:14px;}
 </style>
 </head>
 <body>
 
 <div id="actionScreen" class="wrap hidden">
-  <div class="step action-screen" id="actionScreenContent"></div>
+  <div class="card action-screen" id="actionScreenContent"></div>
 </div>
 
 <div id="mainApp">
 <div class="topbar">
-  <div class="brand"><div class="name">سلمونی کیان</div><div class="sub">مدیریت: مهدی زینتی</div></div>
+  <div class="brand"><div class="name">آرایشگاه</div><div class="sub">رزرو نوبت آنلاین</div></div>
   <div class="switch">
     <button id="tabCustomerBtn" class="active">مشتری</button>
     <button id="tabBarberBtn">آرایشگر</button>
@@ -172,61 +95,42 @@
 
 <div class="wrap">
   <div id="customerView">
-    <div class="rail" id="rail"></div>
     <div id="bookingForm">
-      <div class="step" id="step1"><h2 class="section-title"><span class="n">۱</span> انتخاب خدمت</h2><div class="services" id="servicesList"></div></div>
-      <div class="step locked" id="step2"><h2 class="section-title"><span class="n">۲</span> انتخاب روز</h2><div class="dates" id="datesList"></div></div>
-      <div class="step locked" id="step3"><h2 class="section-title"><span class="n">۳</span> انتخاب ساعت</h2><div id="slotsWrap"><div class="empty-hint">اول روز را انتخاب کنید</div></div></div>
-      <div class="step locked" id="step4">
-        <h2 class="section-title"><span class="n">۴</span> مشخصات شما</h2>
+      <div class="card"><h2 class="section-title"><span class="n">۱</span> انتخاب خدمت</h2><div class="services" id="servicesList"></div></div>
+      <div class="card"><h2 class="section-title"><span class="n">۲</span> انتخاب روز</h2><div class="dates" id="datesList"></div></div>
+      <div class="card"><h2 class="section-title"><span class="n">۳</span> انتخاب ساعت</h2><div id="slotsWrap"><div class="empty-hint">اول روز رو انتخاب کن</div></div></div>
+      <div class="card">
+        <h2 class="section-title"><span class="n">۴</span> اطلاعات شما</h2>
         <label>نام و نام خانوادگی</label><input type="text" id="custName" placeholder="مثلاً: علی محمدی">
         <label>شماره همراه</label><input type="tel" id="custPhone" placeholder="09xxxxxxxxx">
       </div>
-      <div class="step locked" id="step5">
+      <div class="card" id="paymentCard" style="display:none">
         <h2 class="section-title"><span class="n">۵</span> پرداخت بیعانه</h2>
         <div class="amount-box">
           <div class="row"><span>مبلغ کل خدمت</span><span id="fullAmount">-</span></div>
           <div class="row total"><span>بیعانه (۵۰٪) — واریز کنید</span><span id="depositAmount">-</span></div>
         </div>
-        <div style="font-size:.76rem;color:var(--dim);text-align:center;margin-bottom:4px;">شماره کارت</div>
+        <div style="font-size:.78rem;color:var(--text-dim);text-align:center;margin-bottom:4px;">شماره کارت</div>
         <div class="card-num" id="cardNumber"></div>
-        <button class="copy-btn" id="copyCardBtn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-          کپی شماره کارت
-        </button>
+        <button class="copy-btn" id="copyCardBtn">📋 کپی شماره کارت</button>
       </div>
-      <div class="step locked" id="step6">
+      <div class="card" id="receiptCard" style="display:none">
         <h2 class="section-title"><span class="n">۶</span> آپلود رسید واریزی</h2>
-        <div class="upload-box" id="uploadBox">
-          <div class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg></div>
-          <div class="t">برای انتخاب عکس رسید ضربه بزنید</div>
-        </div>
+        <div class="upload-box" id="uploadBox"><div class="icon">📷</div><div class="t">برای انتخاب عکس رسید ضربه بزنید</div></div>
         <input type="file" id="fileInput" accept="image/*" class="hidden">
       </div>
       <button class="btn btn-primary" id="submitBtn" disabled>ثبت نهایی نوبت</button>
     </div>
-    <div id="successScreen" class="step success-screen hidden">
-      <svg class="ring" viewBox="0 0 66 66" fill="none">
-        <circle cx="33" cy="33" r="30" stroke="var(--line)" stroke-width="2"></circle>
-        <circle cx="33" cy="33" r="30" stroke="var(--brass)" stroke-width="2" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="188.5" id="ringProgress" style="animation:ringDraw 1s ease forwards .1s"></circle>
-        <path d="M20 34l9 9 17-19" stroke="var(--brass-soft)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke-dasharray="40" stroke-dashoffset="40" style="animation:checkDraw .5s ease forwards .8s"></path>
-      </svg>
-      <h3>نوبت شما ثبت شد</h3>
-      <p>رسید پرداختی ارسال شد و در انتظار تایید سلمونی کیان است.<br>پس از بررسی رسید، نوبت شما قطعی می‌شود.</p>
+    <div id="successScreen" class="card success-screen hidden">
+      <div class="ic">✅</div><h3>نوبت شما ثبت شد</h3>
+      <p>رسید پرداختی شما ارسال شد و در انتظار تایید آرایشگاه است.<br>پس از بررسی رسید، نوبت شما قطعی می‌شود.</p>
       <button class="btn btn-ghost" id="newBookingBtn">ثبت نوبت جدید</button>
     </div>
   </div>
 
   <div id="barberView" class="hidden">
     <div class="login-box" id="loginBox">
-      <div class="step">
-        <h2 class="section-title">
-          <span class="n"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1a140b" stroke-width="2.5"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg></span>
-          ورود آرایشگر
-        </h2>
-        <label>رمز عبور</label><input type="text" id="pwInput" placeholder="رمز عبور را وارد کنید">
-        <button class="btn btn-primary" id="loginBtn">ورود</button>
-      </div>
+      <div class="card"><h2 class="section-title">🔒 ورود آرایشگر</h2><label>رمز عبور</label><input type="text" id="pwInput" placeholder="رمز عبور را وارد کنید"><button class="btn btn-primary" id="loginBtn">ورود</button></div>
     </div>
     <div id="panelBox" class="hidden">
       <div class="filters" id="filters">
@@ -239,41 +143,24 @@
     </div>
   </div>
 </div>
-
-<footer class="contact">
-  <div class="line"></div>
-  <div class="owner">سلمونی کیان · مهدی زینتی · <a href="tel:08157910832" dir="ltr">08157910832</a></div>
-</footer>
 </div>
 
 <div class="toast" id="toast"></div>
 
-<style>
-  @keyframes ringDraw{ to{stroke-dashoffset:0;} }
-  @keyframes checkDraw{ to{stroke-dashoffset:0;} }
-</style>
-
 <script>
 /* ===================== قابل ویرایش ===================== */
 const SETTINGS = {
-  shopName: "سلمونی کیان",
-  ownerName: "مهدی زینتی",
-  ownerPhone: "08157910832",
   cardNumber: "6037-9975-0000-0000",
   barberPassword: "1234",
   slotMinutes: 30,
-  morningStart: [8, 30],
-  morningEnd: [14, 0],
-  eveningStart: [16, 0],
-  eveningEnd: [23, 0],
-  daysAhead: 20,
-  closedWeekday: 5,        /* getDay(): 5 = جمعه */
-  thursdayWeekday: 4,      /* پنجشنبه — فقط صبح باز است */
+  workStartHour: 9,
+  workEndHour: 21,
+  daysAhead: 14,
   services: [
-    { id:"cut",    name:"کوتاهی مو کلاسیک",     price:250000 },
-    { id:"beard",  name:"اصلاح و فرم ریش",       price:150000 },
-    { id:"color",  name:"رنگ و مش",              price:600000 },
-    { id:"full",   name:"پکیج کامل (کوتاهی + اصلاح)", price:380000 }
+    { id:"cut",   name:"کوتاهی مو",      price:300000 },
+    { id:"color", name:"رنگ مو",         price:900000 },
+    { id:"style", name:"میکاپ / شینیون", price:700000 },
+    { id:"wash",  name:"شستشو و بلوند",  price:500000 }
   ]
 };
 const GITHUB = {
@@ -290,49 +177,11 @@ const TELEGRAM = {
 
 let state = { service:null, date:null, time:null, receiptDataUrl:null, bookings:[], sha:null, barberFilter:"pending" };
 const toastEl = document.getElementById('toast');
-function toast(msg){ toastEl.textContent = msg; toastEl.classList.add('show'); setTimeout(()=>toastEl.classList.remove('show'), 2600); }
+function toast(msg){ toastEl.textContent = msg; toastEl.classList.add('show'); setTimeout(()=>toastEl.classList.remove('show'), 2500); }
 function fmtPrice(n){ return n.toLocaleString('fa-IR') + ' تومان'; }
-const faDigits = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
-function toFa(s){ return String(s).replace(/[0-9]/g, d => faDigits[d]); }
 const GH_API = `https://api.github.com/repos/${GITHUB.owner}/${GITHUB.repo}/contents/${GITHUB.file}`;
 function b64EncodeUnicode(str){ return btoa(unescape(encodeURIComponent(str))); }
 function b64DecodeUnicode(str){ return decodeURIComponent(escape(atob(str))); }
-
-/* ---------- icons ---------- */
-const ICON = {
-  check: `<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M8 12l3 3 5-6"></path></svg>`,
-  cross: `<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--err)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9 9l6 6M15 9l-6 6"></path></svg>`,
-  alert: `<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--warn)" stroke-width="2"><path d="M12 9v4M12 17h.01"></path><circle cx="12" cy="12" r="10"></circle></svg>`,
-  phone: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>`,
-  sms: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`
-};
-
-/* ---------- Jalali calendar ---------- */
-function gregorianToJalali(gy, gm, gd){
-  const g_d_m = [0,31,59,90,120,151,181,212,243,273,304,334];
-  let jy;
-  if (gy <= 1600){ jy = 0; gy -= 621; } else { jy = 979; gy -= 1600; }
-  const gy2 = (gm > 2) ? (gy + 1) : gy;
-  let days = (365*gy) + Math.floor((gy2+3)/4) - Math.floor((gy2+99)/100) + Math.floor((gy2+399)/400) - 80 + gd + g_d_m[gm-1];
-  jy += 33 * Math.floor(days/12053); days %= 12053;
-  jy += 4 * Math.floor(days/1461); days %= 1461;
-  if (days > 365){ jy += Math.floor((days-1)/365); days = (days-1) % 365; }
-  let jm, jd;
-  if (days < 186){ jm = 1 + Math.floor(days/31); jd = 1 + (days % 31); }
-  else { jm = 7 + Math.floor((days-186)/30); jd = 1 + ((days-186) % 30); }
-  return { jy, jm, jd };
-}
-const jMonths = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
-const weekdaysFa = ['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه'];
-function jalaliLabel(dateObj){
-  const { jm, jd } = gregorianToJalali(dateObj.getFullYear(), dateObj.getMonth()+1, dateObj.getDate());
-  return { weekday: weekdaysFa[dateObj.getDay()], jd: toFa(jd), jm: jMonths[jm-1] };
-}
-function jalaliFull(key){
-  const d = new Date(key + 'T00:00:00');
-  const { jy, jm, jd } = gregorianToJalali(d.getFullYear(), d.getMonth()+1, d.getDate());
-  return `${weekdaysFa[d.getDay()]} ${toFa(jd)} ${jMonths[jm-1]} ${toFa(jy)}`;
-}
 
 /* ---------- GitHub storage ---------- */
 async function loadBookings(){
@@ -343,8 +192,16 @@ async function loadBookings(){
   state.bookings = JSON.parse(b64DecodeUnicode(data.content));
 }
 async function saveBookings(message){
-  const body = { message: message || "update bookings", content: b64EncodeUnicode(JSON.stringify(state.bookings, null, 2)), sha: state.sha || undefined };
-  const res = await fetch(GH_API, { method:"PUT", headers:{ Authorization:`token ${GITHUB.token}`, "Content-Type":"application/json" }, body: JSON.stringify(body) });
+  const body = {
+    message: message || "update bookings",
+    content: b64EncodeUnicode(JSON.stringify(state.bookings, null, 2)),
+    sha: state.sha || undefined
+  };
+  const res = await fetch(GH_API, {
+    method: "PUT",
+    headers:{ Authorization:`token ${GITHUB.token}`, "Content-Type":"application/json" },
+    body: JSON.stringify(body)
+  });
   const data = await res.json();
   if(!res.ok) throw new Error(data.message || "GitHub save failed");
   state.sha = data.content.sha;
@@ -356,15 +213,20 @@ async function sendTelegramNotification(booking){
   const confirmUrl = `${siteUrl}?action=confirm&id=${booking.id}`;
   const rejectUrl = `${siteUrl}?action=reject&id=${booking.id}`;
   const caption =
-`نوبت جدید — سلمونی کیان
+`🔔 نوبت جدید
 
-نام: ${booking.name}
-شماره: ${booking.phone}
-خدمت: ${booking.serviceName}
-تاریخ: ${jalaliFull(booking.date)} — ساعت ${booking.time}
-بیعانه واریزی: ${fmtPrice(booking.deposit)} از ${fmtPrice(booking.price)}`;
+👤 ${booking.name}
+📞 ${booking.phone}
+💇 ${booking.serviceName}
+📅 ${booking.date} — ساعت ${booking.time}
+💰 بیعانه واریزی: ${fmtPrice(booking.deposit)} از ${fmtPrice(booking.price)}`;
 
-  const replyMarkup = { inline_keyboard: [[ { text:"تایید نوبت", url: confirmUrl }, { text:"رد نوبت", url: rejectUrl } ]] };
+  const replyMarkup = {
+    inline_keyboard: [[
+      { text:"✅ تایید نوبت", url: confirmUrl },
+      { text:"❌ رد نوبت", url: rejectUrl }
+    ]]
+  };
 
   try{
     const blob = await (await fetch(booking.receipt)).blob();
@@ -375,6 +237,7 @@ async function sendTelegramNotification(booking){
     form.append("photo", blob, "receipt.jpg");
     await fetch(`https://api.telegram.org/bot${TELEGRAM.botToken}/sendPhoto`, { method:"POST", body: form });
   }catch(e){
+    // fallback: text-only message if photo send fails
     await fetch(`https://api.telegram.org/bot${TELEGRAM.botToken}/sendMessage`, {
       method:"POST", headers:{ "Content-Type":"application/json" },
       body: JSON.stringify({ chat_id: TELEGRAM.chatId, text: caption, reply_markup: replyMarkup })
@@ -382,23 +245,11 @@ async function sendTelegramNotification(booking){
   }
 }
 
-/* ---------- SMS confirmation link ---------- */
-function buildSmsLink(booking){
-  const msg =
-`${booking.name} عزیز، سلام
-نوبت شما در سلمونی کیان تایید شد.
-خدمت: ${booking.serviceName}
-تاریخ: ${jalaliFull(booking.date)}
-ساعت: ${booking.time}
-منتظر دیدارتون هستیم.
-مهدی زینتی — سلمونی کیان — ${SETTINGS.ownerPhone}`;
-  return `sms:${booking.phone}?body=${encodeURIComponent(msg)}`;
-}
-
 /* ---------- deep-link action handling (from Telegram buttons) ---------- */
 async function handleUrlAction(){
   const params = new URLSearchParams(window.location.search);
-  const action = params.get('action'); const id = params.get('id');
+  const action = params.get('action');
+  const id = params.get('id');
   if(!action || !id) return false;
 
   document.getElementById('mainApp').classList.add('hidden');
@@ -410,120 +261,58 @@ async function handleUrlAction(){
   try{
     await loadBookings();
     const b = state.bookings.find(x=>x.id===id);
-    if(!b){ content.innerHTML = `<div class="ic">${ICON.alert}</div><h3>نوبت پیدا نشد</h3>`; return true; }
+    if(!b){ content.innerHTML = '<div class="ic">⚠️</div><h3>نوبت پیدا نشد</h3>'; return true; }
     b.status = action === 'confirm' ? 'confirmed' : 'rejected';
     await saveBookings(`${action} booking ${id}`);
-    let smsBtn = '';
-    if(action === 'confirm'){
-      smsBtn = `<a class="btn btn-sms" style="margin-top:16px" href="${buildSmsLink(b)}">${ICON.sms} ارسال پیامک تاییدیه به مشتری</a>`;
-    }
     content.innerHTML = `
-      <div class="ic">${action==='confirm' ? ICON.check : ICON.cross}</div>
+      <div class="ic">${action==='confirm' ? '✅' : '❌'}</div>
       <h3>${action==='confirm' ? 'نوبت تایید شد' : 'نوبت رد شد'}</h3>
-      <p style="color:var(--dim);font-size:.85rem;margin-top:8px;">${b.name} — ${jalaliFull(b.date)} ساعت ${b.time}</p>
-      ${smsBtn}`;
+      <p style="color:var(--text-dim);font-size:.85rem;margin-top:8px;">${b.name} — ${b.date} ساعت ${b.time}</p>`;
   }catch(e){
-    content.innerHTML = `<div class="ic">${ICON.alert}</div><h3>خطا</h3><p style="color:var(--dim);font-size:.8rem;">${e.message}</p>`;
+    content.innerHTML = `<div class="ic">⚠️</div><h3>خطا</h3><p style="color:var(--text-dim);font-size:.8rem;">${e.message}</p>`;
   }
   return true;
 }
 
-/* ---------- progress rail ---------- */
-const STEP_ORDER = ['step1','step2','step3','step4','step5','step6'];
-function buildRail(){
-  const rail = document.getElementById('rail'); rail.innerHTML = '';
-  STEP_ORDER.forEach((id, i)=>{
-    const dot = document.createElement('div'); dot.className = 'dot'; dot.dataset.step = id;
-    rail.appendChild(dot);
-    if(i < STEP_ORDER.length - 1){
-      const seg = document.createElement('div'); seg.className = 'seg'; seg.innerHTML = '<i></i>';
-      seg.dataset.after = id;
-      rail.appendChild(seg);
-    }
-  });
-}
-function refreshRail(unlockedCount){
-  STEP_ORDER.forEach((id, i)=>{
-    const dot = document.querySelector(`.dot[data-step="${id}"]`);
-    dot.classList.toggle('done', i < unlockedCount - 1);
-    dot.classList.toggle('current', i === unlockedCount - 1);
-  });
-  document.querySelectorAll('.seg').forEach((seg, i)=>{
-    seg.querySelector('i').style.width = (i < unlockedCount - 1) ? '100%' : '0%';
-  });
-}
-function unlockStep(id){
-  const el = document.getElementById(id);
-  if(el.classList.contains('locked')){
-    el.classList.remove('locked'); el.classList.add('opening');
-    setTimeout(()=>el.classList.remove('opening'), 500);
-  }
-  const idx = STEP_ORDER.indexOf(id);
-  refreshRail(idx + 1);
-}
-
 /* ---------- date/slot generation ---------- */
-function pad(n){ return String(n).padStart(2,'0'); }
+const weekdays = ['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنج‌شنبه','جمعه','شنبه'];
+const monthsFa = ['ژانویه','فوریه','مارس','آوریل','مه','ژوئن','ژوئیه','اوت','سپتامبر','اکتبر','نوامبر','دسامبر'];
+
 function buildDates(){
   const wrap = document.getElementById('datesList'); wrap.innerHTML = '';
   const today = new Date();
-  let added = 0, i = 0;
-  while(added < SETTINGS.daysAhead){
-    const d = new Date(today); d.setDate(d.getDate()+i); i++;
-    if(d.getDay() === SETTINGS.closedWeekday) continue;
-    const key = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-    const lab = jalaliLabel(d);
+  for(let i=0;i<SETTINGS.daysAhead;i++){
+    const d = new Date(today); d.setDate(d.getDate()+i);
+    const key = d.toISOString().slice(0,10);
     const chip = document.createElement('div');
     chip.className = 'date-chip'; chip.dataset.date = key;
-    chip.innerHTML = `<div class="d1">${lab.weekday}</div><div class="d2">${lab.jd}</div><div class="d3">${lab.jm}</div>`;
+    chip.innerHTML = `<div class="d1">${weekdays[d.getDay()]}</div><div class="d2">${d.getDate()}</div><div class="d3">${monthsFa[d.getMonth()]}</div>`;
     chip.onclick = ()=> selectDate(key, chip);
     wrap.appendChild(chip);
-    added++;
   }
 }
 function selectDate(key, chip){
   document.querySelectorAll('.date-chip').forEach(c=>c.classList.remove('sel'));
   chip.classList.add('sel'); state.date = key; state.time = null;
-  buildSlots(); unlockStep('step3'); updateSubmitState();
-}
-function timeRange(startHM, endHM){
-  const out = [];
-  let [h,m] = startHM;
-  while(h < endHM[0] || (h === endHM[0] && m < endHM[1])){
-    out.push(`${pad(h)}:${pad(m)}`);
-    m += SETTINGS.slotMinutes;
-    if(m >= 60){ m -= 60; h += 1; }
-  }
-  return out;
+  buildSlots(); updateSubmitState();
 }
 function buildSlots(){
   const wrap = document.getElementById('slotsWrap');
-  if(!state.date){ wrap.innerHTML = '<div class="empty-hint">اول روز را انتخاب کنید</div>'; return; }
-  const d = new Date(state.date + 'T00:00:00');
-  const isThursday = d.getDay() === SETTINGS.thursdayWeekday;
+  if(!state.date){ wrap.innerHTML = '<div class="empty-hint">اول روز رو انتخاب کن</div>'; return; }
   const taken = new Set(state.bookings.filter(b=>b.date===state.date && b.status!=='rejected').map(b=>b.time));
-
-  const morning = timeRange(SETTINGS.morningStart, SETTINGS.morningEnd);
-  const evening = isThursday ? [] : timeRange(SETTINGS.eveningStart, SETTINGS.eveningEnd);
-
-  function renderGroup(label, list){
-    if(list.length === 0) return '';
-    let html = `<div class="slot-group-label">${label}</div><div class="slots">`;
-    list.forEach(t=>{
+  let html = '<div class="slots">';
+  for(let h=SETTINGS.workStartHour; h<SETTINGS.workEndHour; h++){
+    for(let m=0; m<60; m+=SETTINGS.slotMinutes){
+      const t = String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
       const isTaken = taken.has(t);
-      html += `<div class="slot ${isTaken?'taken':''}" data-time="${t}" ${isTaken?'':`onclick="selectSlot('${t}')"`}>${toFa(t)}</div>`;
-    });
-    return html + '</div>';
+      html += `<div class="slot ${isTaken?'taken':''}" data-time="${t}" ${isTaken?'':`onclick="selectSlot('${t}')"`}>${t}</div>`;
+    }
   }
-  wrap.innerHTML = renderGroup('صبح', morning) + renderGroup('عصر', evening);
-  if(morning.length === 0 && evening.length === 0){
-    wrap.innerHTML = '<div class="empty-hint">در این روز سلمونی تعطیل است</div>';
-  }
+  html += '</div>'; wrap.innerHTML = html;
 }
 function selectSlot(t){
   state.time = t;
   document.querySelectorAll('.slot').forEach(s=>s.classList.toggle('sel', s.dataset.time===t));
-  unlockStep('step4');
   updateSubmitState();
 }
 function buildServices(){
@@ -534,9 +323,10 @@ function buildServices(){
     el.onclick = ()=>{
       document.querySelectorAll('.svc').forEach(x=>x.classList.remove('sel'));
       el.classList.add('sel'); state.service = s;
+      document.getElementById('paymentCard').style.display = 'block';
+      document.getElementById('receiptCard').style.display = 'block';
       document.getElementById('fullAmount').textContent = fmtPrice(s.price);
       document.getElementById('depositAmount').textContent = fmtPrice(Math.round(s.price/2));
-      unlockStep('step2');
       updateSubmitState();
     };
     wrap.appendChild(el);
@@ -564,9 +354,6 @@ fileInput.onchange = (e)=>{
 function updateSubmitState(){
   const name = document.getElementById('custName').value.trim();
   const phone = document.getElementById('custPhone').value.trim();
-  if(state.service && state.date && state.time){
-    unlockStep('step5'); unlockStep('step6');
-  }
   const ok = state.service && state.date && state.time && name && phone.length>=10 && state.receiptDataUrl;
   document.getElementById('submitBtn').disabled = !ok;
 }
@@ -593,7 +380,7 @@ document.getElementById('submitBtn').onclick = async ()=>{
     };
     state.bookings.push(booking);
     await saveBookings(`new booking from ${booking.name}`);
-    sendTelegramNotification(booking);
+    sendTelegramNotification(booking); // fire and forget
     document.getElementById('bookingForm').classList.add('hidden');
     document.getElementById('successScreen').classList.remove('hidden');
   }catch(e){
@@ -636,24 +423,18 @@ async function refreshBarberList(){
   listEl.innerHTML = '';
   items.forEach(b=>{
     const el = document.createElement('div'); el.className = 'booking-item';
-    let extraActions = '';
-    if(b.status==='pending'){
-      extraActions = `<div class="actions"><button class="btn btn-ok" data-act="confirm" data-id="${b.id}">تایید نوبت</button><button class="btn btn-danger" data-act="reject" data-id="${b.id}">رد کردن</button></div>`;
-    } else if(b.status==='confirmed'){
-      extraActions = `<a class="btn btn-sms" href="${buildSmsLink(b)}">${ICON.sms} ارسال پیامک تاییدیه به مشتری</a>`;
-    }
     el.innerHTML = `
       <div class="top">
         <div>
           <div class="name">${b.name}</div>
-          <div class="meta">${b.serviceName} · ${jalaliFull(b.date)} · ساعت ${toFa(b.time)}</div>
-          <div class="meta">${ICON.phone} ${b.phone}</div>
+          <div class="meta">${b.serviceName} · ${b.date} ساعت ${b.time}</div>
+          <div class="meta">📞 ${b.phone}</div>
           <div class="meta">بیعانه واریزی: ${fmtPrice(b.deposit)} از ${fmtPrice(b.price)}</div>
         </div>
         <span class="status-tag ${b.status}">${statusLabel[b.status]}</span>
       </div>
       <img src="${b.receipt}">
-      ${extraActions}
+      ${b.status==='pending' ? `<div class="actions"><button class="btn btn-ok" data-act="confirm" data-id="${b.id}">تایید نوبت</button><button class="btn btn-danger" data-act="reject" data-id="${b.id}">رد کردن</button></div>` : ''}
     `;
     listEl.appendChild(el);
   });
@@ -672,13 +453,12 @@ document.getElementById('bookingsList').addEventListener('click', async (e)=>{
 
 /* ---------- init ---------- */
 (async function init(){
-  buildRail();
   const handled = await handleUrlAction();
   if(handled) return;
   buildServices(); buildDates();
-  refreshRail(1);
   try{ await loadBookings(); buildSlots(); }catch(e){ /* ignore on first load */ }
 })();
 </script>
 </body>
 </html>
+
