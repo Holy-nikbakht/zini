@@ -276,12 +276,7 @@ const SETTINGS = {
     { id:"full",   name:"پکیج کامل (کوتاهی + اصلاح)", price:380000 }
   ]
 };
-const GITHUB = {
-  owner: "Holy-nikbakht",
-  repo: "zini",
-  token: "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",
-  file: "bookings.json"
-};
+const WORKER_URL = "https://wild-dream-1264.nova-3d30d7.workers.dev";
 const TELEGRAM = {
   botToken: "8882005169:AAE0XPif0DIl_FZpPgJSd0DNaa03KZGHXPg",
   chatId: "6248048933"
@@ -294,7 +289,6 @@ function toast(msg){ toastEl.textContent = msg; toastEl.classList.add('show'); s
 function fmtPrice(n){ return n.toLocaleString('fa-IR') + ' تومان'; }
 const faDigits = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
 function toFa(s){ return String(s).replace(/[0-9]/g, d => faDigits[d]); }
-const GH_API = `https://api.github.com/repos/${GITHUB.owner}/${GITHUB.repo}/contents/${GITHUB.file}`;
 function b64EncodeUnicode(str){ return btoa(unescape(encodeURIComponent(str))); }
 function b64DecodeUnicode(str){ return decodeURIComponent(escape(atob(str))); }
 
@@ -336,20 +330,20 @@ function jalaliFull(key){
 
 /* ---------- GitHub storage ---------- */
 async function loadBookings(){
-  const res = await fetch(GH_API, { headers:{ Authorization:`token ${GITHUB.token}` }, cache:"no-store" });
+  const res = await fetch(WORKER_URL, { cache:"no-store" });
   if(res.status === 404){ state.bookings = []; state.sha = null; return; }
   const data = await res.json();
   if(!res.ok){
-    throw new Error(`دریافت از گیت‌هاب ناموفق بود (کد ${res.status}): ${data.message || 'خطای نامشخص'}`);
+    throw new Error(`دریافت از سرور ناموفق بود (کد ${res.status}): ${data.message || 'خطای نامشخص'}`);
   }
   state.sha = data.sha;
   state.bookings = JSON.parse(b64DecodeUnicode(data.content));
 }
 async function saveBookings(message){
   const body = { message: message || "update bookings", content: b64EncodeUnicode(JSON.stringify(state.bookings, null, 2)), sha: state.sha || undefined };
-  const res = await fetch(GH_API, { method:"PUT", headers:{ Authorization:`token ${GITHUB.token}`, "Content-Type":"application/json" }, body: JSON.stringify(body) });
+  const res = await fetch(WORKER_URL, { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(body) });
   const data = await res.json();
-  if(!res.ok) throw new Error(data.message || "GitHub save failed");
+  if(!res.ok) throw new Error(data.message || "ذخیره‌سازی ناموفق بود");
   state.sha = data.content.sha;
 }
 
@@ -685,4 +679,3 @@ document.getElementById('bookingsList').addEventListener('click', async (e)=>{
 </script>
 </body>
 </html>
-
